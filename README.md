@@ -13,8 +13,8 @@
 | **registry.k8s.io** | Kubernetes 官方镜像 |
 | **k8s.gcr.io** | Kubernetes 镜像（兼容） |
 | **quay.io** | Red Hat Quay 镜像仓库 |
-| **ghcr.io** | GitHub Container Registry 🆕 |
-| **mcr.microsoft.com** | Microsoft Container Registry 🆕 |
+| **ghcr.io** | GitHub Container Registry |
+| **mcr.microsoft.com** | Microsoft Container Registry |
 
 ## 🚀 使用方法
 
@@ -26,26 +26,36 @@ docker pull docker.at9.net/{原始镜像路径}
 
 ### 经过验证的可用镜像
 ```bash
-# Docker Hub 镜像
+# 1. Docker Hub 镜像
 docker pull docker.at9.net/nginx:latest
 docker pull docker.at9.net/node:18-alpine
 docker pull docker.at9.net/mysql:8.0
 docker pull docker.at9.net/redis:7-alpine
 docker pull docker.at9.net/tomcat:latest
 
-# Google Container Registry
+# 2. Google Container Registry (gcr.io)
 docker pull docker.at9.net/distroless/static-debian11:latest
 
-# Microsoft Container Registry
-docker pull docker.at9.net/dotnet/runtime:8.0
-docker pull docker.at9.net/dotnet/sdk:8.0
-
-# Quay.io
-docker pull docker.at9.net/prometheus/prometheus:latest
-
-# Kubernetes
+# 3. Kubernetes 官方镜像 (registry.k8s.io)
 docker pull docker.at9.net/pause:3.9
 docker pull docker.at9.net/coredns/coredns:v1.10.1
+
+# 4. Kubernetes 兼容镜像 (k8s.gcr.io)
+# 注意：k8s.gcr.io 重定向到 registry.k8s.io，使用相同路径
+docker pull docker.at9.net/pause:3.6
+docker pull docker.at9.net/etcd:3.5.9
+
+# 5. Quay.io 镜像
+docker pull docker.at9.net/prometheus/prometheus:latest
+
+# 6. GitHub Container Registry (ghcr.io) 
+# 注意：大多数需要认证，公开镜像较少
+# docker pull docker.at9.net/{github-org}/{repo}:tag
+
+# 7. Microsoft Container Registry (mcr.microsoft.com) 
+docker pull docker.at9.net/dotnet/runtime:8.0
+docker pull docker.at9.net/dotnet/sdk:8.0
+docker pull docker.at9.net/dotnet/aspnet:8.0
 ```
 
 ## ⚙️ 配置镜像源（推荐）
