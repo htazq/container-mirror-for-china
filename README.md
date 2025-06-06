@@ -158,4 +158,9 @@ MIT License
 
 ---
 
+## 📞 问题反馈
+
+- **项目地址**: [https://github.com/htazq/container-mirror-for-china](https://github.com/htazq/container-mirror-for-china)
+- **问题反馈**: 如有任何问题或建议，请在 [Issues](https://github.com/htazq/container-mirror-for-china/issues) 页面提交
+
 **⭐ 如果有帮助，请给个 Star！**
