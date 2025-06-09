@@ -37,8 +37,10 @@ docker pull docker.at9.net/tomcat:latest
 docker pull docker.at9.net/distroless/static-debian11:latest
 
 # 3. Kubernetes 官方镜像 (registry.k8s.io)
+# ⚠️ 注意：Kubernetes 官方镜像通常不提供 latest 标签，必须指定具体版本
 docker pull docker.at9.net/pause:3.9
 docker pull docker.at9.net/coredns/coredns:v1.10.1
+docker pull docker.at9.net/sig-storage/csi-node-driver-registrar:v2.9.0
 
 # 4. Kubernetes 兼容镜像 (k8s.gcr.io)
 # 注意：k8s.gcr.io 重定向到 registry.k8s.io，使用相同路径
@@ -172,6 +174,7 @@ flowchart TD
 
 - **第一次慢?** 需要从上游同步，后续极速
 - **某些镜像失败?** GitHub/私有镜像可能需要认证
+- **Kubernetes 镜像拉取失败?** Kubernetes 官方镜像不提供 `latest` 标签，必须指定具体版本号
 - **如何验证?** 访问 [Web 界面](https://docker.at9.net) 确认可用性
 
 ## 📄 许可证
