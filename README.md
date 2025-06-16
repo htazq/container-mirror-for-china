@@ -1,191 +1,114 @@
 # Zot 公益镜像仓库
 
-🚀 **高速、稳定、免费的容器镜像加速服务** - `docker.at9.net`
+🚀 **高速、稳定、免费的容器镜像加速服务**  
+访问地址: [docker.at9.net](https://docker.at9.net)
 
-> 🎉 **最新更新**: 支持 **7 个主流容器仓库**，包括 Docker Hub、GitHub、Microsoft 等
+---
 
-## 🌐 支持的镜像源
+## 🎉 最新更新
+- 支持 7 个主流容器仓库
+- 提供隐式智能搜索和显式路径指定两种模式
+- 极致的镜像拉取体验
 
-| 原始仓库 | 说明 |
-|---------|------|
-| **Docker Hub** | Docker 官方镜像库 |
-| **gcr.io** | Google Container Registry |
-| **registry.k8s.io** | Kubernetes 官方镜像 |
-| **k8s.gcr.io** | Kubernetes 镜像（兼容） |
-| **quay.io** | Red Hat Quay 镜像仓库 |
-| **ghcr.io** | GitHub Container Registry |
-| **mcr.microsoft.com** | Microsoft Container Registry |
+---
 
-## 🚀 使用方法
+## ⚡️ 核心用法
 
-### 基本用法
+### 模式一：隐式智能搜索（推荐）
+直接拉取镜像，服务会自动在所有上游仓库中寻找。
+
 ```bash
-# 原理：在任何镜像前加 docker.at9.net/
-docker pull docker.at9.net/{原始镜像路径}
-```
-
-### 经过验证的可用镜像
-```bash
-# 1. Docker Hub 镜像
+# Zot 会自动在所有源中寻找 nginx，最终在 Docker Hub 找到
 docker pull docker.at9.net/nginx:latest
-docker pull docker.at9.net/node:18-alpine
-docker pull docker.at9.net/mysql:8.0
-docker pull docker.at9.net/redis:7-alpine
-docker pull docker.at9.net/tomcat:latest
 
-# 2. Google Container Registry (gcr.io)
-docker pull docker.at9.net/distroless/static-debian11:latest
-
-# 3. Kubernetes 官方镜像 (registry.k8s.io)
-# ⚠️ 注意：Kubernetes 官方镜像通常不提供 latest 标签，必须指定具体版本
+# Zot 会自动寻找 pause，最终在 registry.k8s.io 找到
 docker pull docker.at9.net/pause:3.9
-docker pull docker.at9.net/coredns/coredns:v1.10.1
-docker pull docker.at9.net/sig-storage/csi-node-driver-registrar:v2.9.0
 
-# 4. Kubernetes 兼容镜像 (k8s.gcr.io)
-# 注意：k8s.gcr.io 重定向到 registry.k8s.io，使用相同路径
-docker pull docker.at9.net/pause:3.6
-docker pull docker.at9.net/etcd:3.5.9
-
-# 5. Quay.io 镜像
-docker pull docker.at9.net/prometheus/prometheus:latest
-
-# 6. GitHub Container Registry (ghcr.io) 
-# 注意：大多数需要认证，公开镜像较少
-# docker pull docker.at9.net/{github-org}/{repo}:tag
-
-# 7. Microsoft Container Registry (mcr.microsoft.com) 
-docker pull docker.at9.net/dotnet/runtime:8.0
-docker pull docker.at9.net/dotnet/sdk:8.0
-docker pull docker.at9.net/dotnet/aspnet:8.0
+# Zot 会自动寻找 distroless/static-debian11, 最终在 gcr.io 找到
+docker pull docker.at9.net/distroless/static-debian11:latest
 ```
+
+### 模式二：显式路径指定
+在镜像路径前加上源仓库地址作为前缀，实现精确路由。
+
+| 原始仓库           | 显式拉取命令示例                                               |
+|--------------------|--------------------------------------------------------------|
+| Docker Hub         | `docker pull docker.at9.net/docker.io/library/nginx:latest`   |
+| gcr.io             | `docker pull docker.at9.net/gcr.io/distroless/static-debian11:latest` |
+| registry.k8s.io    | `docker pull docker.at9.net/registry.k8s.io/pause:3.9`        |
+| quay.io            | `docker pull docker.at9.net/quay.io/prometheus/prometheus:v2.53.0` |
+| mcr.microsoft.com  | `docker pull docker.at9.net/mcr.microsoft.com/dotnet/runtime:8.0` |
+| ghcr.io            | `docker pull docker.at9.net/ghcr.io/project-zot/zot-linux-amd64:v2.1.4` |
+| k8s.gcr.io (兼容)  | `docker pull docker.at9.net/registry.k8s.io/etcd:3.5.9-0`     |
+
+---
 
 ## ⚙️ 配置镜像源（推荐）
 
 ### Docker 配置
-编辑 `/etc/docker/daemon.json`:
+编辑 `/etc/docker/daemon.json`（如无则新建），重启 Docker 服务：
+
 ```json
 {
   "registry-mirrors": ["https://docker.at9.net"]
 }
 ```
 
-### Kubernetes containerd 配置
-编辑 `/etc/containerd/config.toml`:
+配置后可直接运行 `docker pull nginx:latest`，请求会自动加速。
+
+### Kubernetes (containerd) 配置
+编辑 `/etc/containerd/config.toml`，在 `[plugins."io.containerd.grpc.v1.cri".registry.mirrors]` 下为每个上游仓库添加 endpoint：
+
 ```toml
-[plugins."io.containerd.grpc.v1.cri".registry]
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-      endpoint = ["https://docker.at9.net"]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]  
-      endpoint = ["https://docker.at9.net"]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
-      endpoint = ["https://docker.at9.net"]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
-      endpoint = ["https://docker.at9.net"]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."ghcr.io"]
-      endpoint = ["https://docker.at9.net"]
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."mcr.microsoft.com"]
-      endpoint = ["https://docker.at9.net"]
+[plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+    endpoint = ["https://docker.at9.net"]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
+    endpoint = ["https://docker.at9.net"]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
+    endpoint = ["https://docker.at9.net"]
+  # ...为 quay.io, mcr.microsoft.com, ghcr.io 添加类似配置
 ```
-
-### K3s 配置
-创建 `/etc/rancher/k3s/registries.yaml`:
-```yaml
-mirrors:
-  docker.io:
-    endpoint: ["https://docker.at9.net"]
-  registry.k8s.io:
-    endpoint: ["https://docker.at9.net"]
-  gcr.io:
-    endpoint: ["https://docker.at9.net"]
-  quay.io:
-    endpoint: ["https://docker.at9.net"]
-  ghcr.io:
-    endpoint: ["https://docker.at9.net"]
-  mcr.microsoft.com:
-    endpoint: ["https://docker.at9.net"]
-```
-
-## 📊 服务状态
-
-- **Web 界面**: [https://docker.at9.net](https://docker.at9.net)
-- **API 检查**: `curl https://docker.at9.net/v2/`
-- **已缓存镜像**: `curl https://docker.at9.net/v2/_catalog`
-
-## 🔧 工作原理
-
-**Zot 智能路由机制**:
-
-1. **按需同步**: 首次请求时自动从 7 个上游仓库拉取
-2. **智能匹配**: 自动尝试各个仓库，找到第一个可用源
-3. **本地缓存**: 后续访问直接从本地高速返回
-4. **内容去重**: 相同层只存储一份，节省空间
-5. **自动清理**: 定期垃圾回收，保持系统健康
-
-**配置示例**（简化）:
-```json
-{
-  "extensions": {
-    "sync": {
-      "registries": [
-        {"urls": ["https://registry-1.docker.io"]},
-        {"urls": ["https://gcr.io"]},
-        {"urls": ["https://registry.k8s.io"]},
-        {"urls": ["https://quay.io"]},
-        {"urls": ["https://ghcr.io"]},
-        {"urls": ["https://mcr.microsoft.com"]}
-      ]
-    }
-  }
-}
-```
-
-**路由决策流程图**:
-
-```mermaid
-flowchart TD
-    A["用户请求镜像"] --> B["本地缓存检查"]
-    B -->|缓存命中| C["直接返回镜像"]
-    B -->|缓存未命中| D["按顺序尝试上游仓库"]
-    D --> E["Docker Hub"]
-    D --> F["gcr.io"]
-    D --> G["registry.k8s.io"]
-    D --> H["quay.io"]
-    D --> I["ghcr.io"]
-    D --> J["mcr.microsoft.com"]
-    E -->|成功| K["下载并缓存"]
-    F -->|成功| K
-    G -->|成功| K
-    H -->|成功| K
-    I -->|成功| K
-    J -->|成功| K
-    E -->|失败| L["尝试下一个源"]
-    F -->|失败| L
-    G -->|失败| L
-    H -->|失败| L
-    I -->|失败| L
-    L --> D
-    K --> M["返回给用户"]
-    J -->|全部失败| N["返回错误"]
-```
-
-## ❓ 常见问题
-
-- **第一次慢?** 需要从上游同步，后续极速
-- **某些镜像失败?** GitHub/私有镜像可能需要认证
-- **Kubernetes 镜像拉取失败?** Kubernetes 官方镜像不提供 `latest` 标签，必须指定具体版本号
-- **如何验证?** 访问 [Web 界面](https://docker.at9.net) 确认可用性
-
-## 📄 许可证
-
-MIT License
 
 ---
 
-## 📞 问题反馈
+## 🔧 工作原理
+本服务采用 Nginx + Zot 的强大组合架构，兼顾灵活性与性能。
 
-- **项目地址**: [https://github.com/htazq/container-mirror-for-china](https://github.com/htazq/container-mirror-for-china)
-- **问题反馈**: 如有任何问题或建议，请在 [Issues](https://github.com/htazq/container-mirror-for-china/issues) 页面提交
+### 路由决策流程图
 
-**⭐ 如果有帮助，请给个 Star！**
+```mermaid
+graph TD
+    subgraph "用户侧"
+        A["docker pull docker.at9.net/nginx<br/>或<br/>docker pull docker.at9.net/gcr.io/xxx"]
+    end
+    subgraph "我们的服务 (docker.at9.net)"
+        B(Nginx Shim 层)
+        C(Zot 代理层)
+    end
+    subgraph "上游公共仓库"
+        D[Docker Hub]
+        E[GCR]
+        F[K8s Registry]
+        G[...]
+    end
+    A --> B
+    B -->|"请求路径包含 gcr.io, k8s.io 等<br/>Nginx 移除前缀"| C
+    B -->|"请求路径不含前缀"| C
+    C -->|"智能搜索"| D
+    C -->|"智能搜索"| E
+    C -->|"智能搜索"| F
+    C -->|"智能搜索"| G
+```
+
+- **Nginx Shim 层**：作为流量入口，解析请求。若为显式路径（如 .../gcr.io/...），智能移除前缀，传递"干净"路径给后端。
+- **Zot 代理层**：接收 Nginx 请求，执行隐式智能搜索，按预设顺序在所有上游仓库中查找镜像，找到后缓存并返回。
+
+---
+
+## 📞 服务状态与反馈
+- 服务首页: [https://docker.at9.net](https://docker.at9.net)
+- API 健康检查: `curl https://docker.at9.net/v2/`（应返回 `{}`）
+- 项目地址: [https://github.com/htazq/container-mirror-for-china](https://github.com/htazq/container-mirror-for-china)
+- 问题反馈: 如有任何问题或建议，请在 Issues 页面提交
+- ⭐ 如果这个项目对您有帮助，请给个 Star！
