@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\n添加完整配置文件，支持 10 个主流镜像源\n\n- 新增 docker-compose.yml 和配置文件\n- 支持 Docker Hub、GCR、K8s、Quay、GitHub、Microsoft、NVIDIA、Elastic、GitLab\n- 简化 README.md，清晰的部署说明\n- 简化 index.html，显式展示镜像源位置\n- 支持显式和隐式两种拉取方式\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\n添加完整配置文件，支持 10 个主流镜像源\n\n- 新增 docker-compose.yml 和配置文件\n- 支持 Docker Hub、GCR、K8s、Quay、GitHub、Microsoft、NVIDIA、Elastic、GitLab\n- 简化 README.md，清晰的部署说明\n- 简化 index.html，显式展示镜像源位置\n- 支持显式和隐式两种拉取方式\nEOF\n)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

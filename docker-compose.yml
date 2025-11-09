@@ -10,7 +10,7 @@ services:
       - "5000:5000"  # 内部端口，不对外暴露
     volumes:
       - ./config/zot-config.json:/etc/zot/config.json:ro
-      # - zot-data:/var/lib/zot #不做持久化镜像存储
+      - zot-data:/var/lib/zot
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
       interval: 30s
@@ -56,8 +56,7 @@ networks:
   zot-network:
     driver: bridge
 
-# 不做镜像数据持久化
-# volumes:
-#   zot-data:
-#     driver: local
+volumes:
+  zot-data:
+    driver: local
 

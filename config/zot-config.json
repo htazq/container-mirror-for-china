@@ -7,10 +7,7 @@
   },
   "http": {
     "address": "0.0.0.0",
-    "port": "5000",
-    "readTimeout": "1800s",
-    "writeTimeout": "1800s",
-    "idleTimeout": "300s"
+    "port": "5000"
   },
   "log": {
     "level": "info"
