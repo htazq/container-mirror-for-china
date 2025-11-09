@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>容器镜像加速服务</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        .service-url {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th {
+            background: #2563eb;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background: #f0f9ff;
+        }
+        code {
+            background: #1e293b;
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .source {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 容器镜像加速服务</h1>
+
+        <div class="service-url">docker.at9.net</div>
+
+        <h2>📦 支持的镜像源</h2>
+        <table>
+            <tr>
+                <th>镜像源</th>
+                <th>源地址</th>
+            </tr>
+            <tr>
+                <td>Docker Hub</td>
+                <td><span class="source">registry-1.docker.io</span></td>
+            </tr>
+            <tr>
+                <td>Google GCR</td>
+                <td><span class="source">gcr.io</span></td>
+            </tr>
+            <tr>
+                <td>Kubernetes (旧)</td>
+                <td><span class="source">k8s.gcr.io</span></td>
+            </tr>
+            <tr>
+                <td>Kubernetes</td>
+                <td><span class="source">registry.k8s.io</span></td>
+            </tr>
+            <tr>
+                <td>Red Hat Quay</td>
+                <td><span class="source">quay.io</span></td>
+            </tr>
+            <tr>
+                <td>GitHub</td>
+                <td><span class="source">ghcr.io</span></td>
+            </tr>
+            <tr>
+                <td>Microsoft</td>
+                <td><span class="source">mcr.microsoft.com</span></td>
+            </tr>
+            <tr>
+                <td>NVIDIA</td>
+                <td><span class="source">nvcr.io</span></td>
+            </tr>
+            <tr>
+                <td>Elastic</td>
+                <td><span class="source">docker.elastic.co</span></td>
+            </tr>
+            <tr>
+                <td>GitLab</td>
+                <td><span class="source">registry.gitlab.com</span></td>
+            </tr>
+        </table>
+
+        <h2>📖 使用方法</h2>
+
+        <h3>方式一：显式指定源（推荐）</h3>
+        <p>清楚知道镜像从哪个源拉取：</p>
+        <table>
+            <tr>
+                <th>源</th>
+                <th>命令示例</th>
+            </tr>
+            <tr>
+                <td>Docker Hub</td>
+                <td><code>docker pull docker.at9.net/docker.io/library/nginx:latest</code></td>
+            </tr>
+            <tr>
+                <td>GCR</td>
+                <td><code>docker pull docker.at9.net/gcr.io/distroless/static-debian11</code></td>
+            </tr>
+            <tr>
+                <td>K8s</td>
+                <td><code>docker pull docker.at9.net/registry.k8s.io/pause:3.9</code></td>
+            </tr>
+            <tr>
+                <td>Quay</td>
+                <td><code>docker pull docker.at9.net/quay.io/prometheus/prometheus:latest</code></td>
+            </tr>
+            <tr>
+                <td>GitHub</td>
+                <td><code>docker pull docker.at9.net/ghcr.io/project-zot/zot-linux-amd64:latest</code></td>
+            </tr>
+            <tr>
+                <td>Microsoft</td>
+                <td><code>docker pull docker.at9.net/mcr.microsoft.com/dotnet/runtime:8.0</code></td>
+            </tr>
+            <tr>
+                <td>NVIDIA</td>
+                <td><code>docker pull docker.at9.net/nvcr.io/nvidia/cuda:12.0.0-base</code></td>
+            </tr>
+            <tr>
+                <td>Elastic</td>
+                <td><code>docker pull docker.at9.net/docker.elastic.co/elasticsearch/elasticsearch:8.11.0</code></td>
+            </tr>
+            <tr>
+                <td>GitLab</td>
+                <td><code>docker pull docker.at9.net/registry.gitlab.com/gitlab-org/gitlab-runner:latest</code></td>
+            </tr>
+        </table>
+
+        <h3>方式二：隐式拉取</h3>
+        <p>不指定源，默认从 Docker Hub 拉取：</p>
+        <p><code>docker pull docker.at9.net/nginx:latest</code></p>
+
+        <h3>方式三：配置为镜像源</h3>
+        <div class="note">
+            <strong>Docker 配置</strong><br>
+            编辑 <code>/etc/docker/daemon.json</code>：<br>
+            <code>{ "registry-mirrors": ["https://docker.at9.net"] }</code><br>
+            重启：<code>sudo systemctl restart docker</code>
+        </div>
+
+        <h2>🔧 部署说明</h2>
+        <p>需要一台海外 VPS 和域名，使用 Docker Compose 一键部署：</p>
+        <p><code>docker-compose up -d</code></p>
+        <p>详细说明见项目 README.md</p>
+
+        <footer>
+            <p><strong>为云原生进步一起加油！</strong></p>
+            <p>Powered by Zot + Nginx</p>
+        </footer>
+    </div>
+</body>
+</html>

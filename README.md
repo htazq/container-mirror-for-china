@@ -1,114 +1,208 @@
-# Zot 公益镜像仓库
+# 容器镜像加速服务
 
-🚀 **高速、稳定、免费的容器镜像加速服务**  
-访问地址: [docker.at9.net](https://docker.at9.net)
+一个简单的 Docker 镜像代理服务，帮助国内开发者加速容器镜像拉取。
 
----
+## 支持的镜像源
 
-## 🎉 最新更新
-- 支持 7 个主流容器仓库
-- 提供隐式智能搜索和显式路径指定两种模式
-- 极致的镜像拉取体验
+| 镜像源 | 域名 |
+|--------|------|
+| Docker Hub | registry-1.docker.io |
+| Google Container Registry | gcr.io |
+| Kubernetes (旧) | k8s.gcr.io |
+| Kubernetes | registry.k8s.io |
+| Red Hat Quay | quay.io |
+| GitHub Container Registry | ghcr.io |
+| Microsoft Container Registry | mcr.microsoft.com |
+| NVIDIA GPU Cloud | nvcr.io |
+| Elastic | docker.elastic.co |
+| GitLab | registry.gitlab.com |
 
----
+## 快速部署
 
-## ⚡️ 核心用法
+### 前置要求
+- Docker 和 Docker Compose
+- 一台海外 VPS（推荐美国）
+- 一个域名（可选）
 
-### 模式一：隐式智能搜索（推荐）
-直接拉取镜像，服务会自动在所有上游仓库中寻找。
+### 部署步骤
 
+1. **上传文件到服务器**
 ```bash
-# Zot 会自动在所有源中寻找 nginx，最终在 Docker Hub 找到
-docker pull docker.at9.net/nginx:latest
-
-# Zot 会自动寻找 pause，最终在 registry.k8s.io 找到
-docker pull docker.at9.net/pause:3.9
-
-# Zot 会自动寻找 distroless/static-debian11, 最终在 gcr.io 找到
-docker pull docker.at9.net/distroless/static-debian11:latest
+# 将项目文件上传到服务器
+scp -r ./* root@your-vps:/opt/docker-mirror
+ssh root@your-vps
+cd /opt/docker-mirror
 ```
 
-### 模式二：显式路径指定
-在镜像路径前加上源仓库地址作为前缀，实现精确路由。
+2. **修改域名（如果有自己的域名）**
+```bash
+# 将 docker.at9.net 替换为你的域名
+sed -i 's/docker.at9.net/your-domain.com/g' config/nginx.conf config/index.html
+```
 
-| 原始仓库           | 显式拉取命令示例                                               |
-|--------------------|--------------------------------------------------------------|
-| Docker Hub         | `docker pull docker.at9.net/docker.io/library/nginx:latest`   |
-| gcr.io             | `docker pull docker.at9.net/gcr.io/distroless/static-debian11:latest` |
-| registry.k8s.io    | `docker pull docker.at9.net/registry.k8s.io/pause:3.9`        |
-| quay.io            | `docker pull docker.at9.net/quay.io/prometheus/prometheus:v2.53.0` |
-| mcr.microsoft.com  | `docker pull docker.at9.net/mcr.microsoft.com/dotnet/runtime:8.0` |
-| ghcr.io            | `docker pull docker.at9.net/ghcr.io/project-zot/zot-linux-amd64:v2.1.4` |
-| k8s.gcr.io (兼容)  | `docker pull docker.at9.net/registry.k8s.io/etcd:3.5.9-0`     |
+3. **启动服务**
+```bash
+docker-compose up -d
+```
 
----
+4. **查看服务状态**
+```bash
+docker-compose ps
+docker-compose logs -f
+```
 
-## ⚙️ 配置镜像源（推荐）
+### 配置 SSL（推荐）
 
-### Docker 配置
-编辑 `/etc/docker/daemon.json`（如无则新建），重启 Docker 服务：
+```bash
+# 安装 certbot
+apt update && apt install -y certbot
 
+# 停止 nginx
+docker-compose stop nginx
+
+# 获取证书（替换为你的域名）
+certbot certonly --standalone -d your-domain.com
+
+# 复制证书
+mkdir -p ssl
+cp /etc/letsencrypt/live/your-domain.com/fullchain.pem ssl/
+cp /etc/letsencrypt/live/your-domain.com/privkey.pem ssl/
+
+# 修改 nginx.conf，取消 HTTPS server 块的注释
+
+# 重启服务
+docker-compose up -d
+```
+
+## 使用方法
+
+### 方式一：直接拉取（推荐）
+
+显式指定源（推荐，明确知道从哪里拉取）：
+```bash
+# Docker Hub
+docker pull your-domain.com/docker.io/library/nginx:latest
+
+# Google GCR
+docker pull your-domain.com/gcr.io/distroless/static-debian11
+
+# Kubernetes
+docker pull your-domain.com/registry.k8s.io/pause:3.9
+
+# Quay
+docker pull your-domain.com/quay.io/prometheus/prometheus:latest
+
+# GitHub
+docker pull your-domain.com/ghcr.io/project-zot/zot-linux-amd64:latest
+
+# Microsoft
+docker pull your-domain.com/mcr.microsoft.com/dotnet/runtime:8.0
+
+# NVIDIA
+docker pull your-domain.com/nvcr.io/nvidia/cuda:12.0.0-base
+
+# Elastic
+docker pull your-domain.com/docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+
+# GitLab
+docker pull your-domain.com/registry.gitlab.com/gitlab-org/gitlab-runner:latest
+```
+
+隐式拉取（自动匹配 Docker Hub）：
+```bash
+docker pull your-domain.com/nginx:latest
+```
+
+### 方式二：配置为镜像源
+
+**Docker 配置** (`/etc/docker/daemon.json`):
 ```json
 {
-  "registry-mirrors": ["https://docker.at9.net"]
+  "registry-mirrors": ["https://your-domain.com"]
 }
 ```
 
-配置后可直接运行 `docker pull nginx:latest`，请求会自动加速。
+重启 Docker:
+```bash
+sudo systemctl restart docker
+```
 
-### Kubernetes (containerd) 配置
-编辑 `/etc/containerd/config.toml`，在 `[plugins."io.containerd.grpc.v1.cri".registry.mirrors]` 下为每个上游仓库添加 endpoint：
-
+**Kubernetes (containerd) 配置** (`/etc/containerd/config.toml`):
 ```toml
 [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-    endpoint = ["https://docker.at9.net"]
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
-    endpoint = ["https://docker.at9.net"]
+    endpoint = ["https://your-domain.com"]
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
-    endpoint = ["https://docker.at9.net"]
-  # ...为 quay.io, mcr.microsoft.com, ghcr.io 添加类似配置
+    endpoint = ["https://your-domain.com"]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
+    endpoint = ["https://your-domain.com"]
+```
+
+重启 containerd:
+```bash
+sudo systemctl restart containerd
+```
+
+## 常用管理命令
+
+```bash
+# 启动
+docker-compose up -d
+
+# 停止
+docker-compose down
+
+# 重启
+docker-compose restart
+
+# 查看日志
+docker-compose logs -f
+
+# 查看状态
+docker-compose ps
+
+# 更新服务
+docker-compose pull
+docker-compose up -d
+```
+
+## 工作原理
+
+- **Zot**：开源的容器镜像代理，按需拉取并缓存镜像
+- **Nginx**：前端代理，处理路由和提供首页
+- **按需缓存**：首次拉取镜像时从上游源获取，之后使用缓存
+- **自动清理**：定期 GC 清理过期镜像，节省磁盘空间
+
+## 故障排查
+
+```bash
+# 检查服务是否运行
+docker-compose ps
+
+# 查看 Zot 日志
+docker-compose logs zot
+
+# 查看 Nginx 日志
+docker-compose logs nginx
+
+# 测试服务
+curl http://localhost/health
+curl http://localhost/v2/
+```
+
+## 项目结构
+
+```
+.
+├── docker-compose.yml          # Docker Compose 配置
+├── config/
+│   ├── zot-config.json        # Zot 配置
+│   ├── nginx.conf             # Nginx 配置
+│   └── index.html             # 首页
+├── ssl/                       # SSL 证书（可选）
+└── README.md
 ```
 
 ---
 
-## 🔧 工作原理
-本服务采用 Nginx + Zot 的强大组合架构，兼顾灵活性与性能。
-
-### 路由决策流程图
-
-```mermaid
-graph TD
-    subgraph "用户侧"
-        A["docker pull docker.at9.net/nginx<br/>或<br/>docker pull docker.at9.net/gcr.io/xxx"]
-    end
-    subgraph "我们的服务 (docker.at9.net)"
-        B(Nginx Shim 层)
-        C(Zot 代理层)
-    end
-    subgraph "上游公共仓库"
-        D[Docker Hub]
-        E[GCR]
-        F[K8s Registry]
-        G[...]
-    end
-    A --> B
-    B -->|"请求路径包含 gcr.io, k8s.io 等<br/>Nginx 移除前缀"| C
-    B -->|"请求路径不含前缀"| C
-    C -->|"智能搜索"| D
-    C -->|"智能搜索"| E
-    C -->|"智能搜索"| F
-    C -->|"智能搜索"| G
-```
-
-- **Nginx Shim 层**：作为流量入口，解析请求。若为显式路径（如 .../gcr.io/...），智能移除前缀，传递"干净"路径给后端。
-- **Zot 代理层**：接收 Nginx 请求，执行隐式智能搜索，按预设顺序在所有上游仓库中查找镜像，找到后缓存并返回。
-
----
-
-## 📞 服务状态与反馈
-- 服务首页: [https://docker.at9.net](https://docker.at9.net)
-- API 健康检查: `curl https://docker.at9.net/v2/`（应返回 `{}`）
-- 项目地址: [https://github.com/htazq/container-mirror-for-china](https://github.com/htazq/container-mirror-for-china)
-- 问题反馈: 如有任何问题或建议，请在 Issues 页面提交
-- ⭐ 如果这个项目对您有帮助，请给个 Star！
+**为云原生进步一起加油！**
