@@ -26,12 +26,22 @@
 
 ### 部署步骤
 
-1. **上传文件到服务器**
+1. **克隆项目到服务器**
+
+使用 Git Clone（推荐）：
 ```bash
-# 将项目文件上传到服务器
-scp -r ./* root@your-vps:/opt/docker-mirror
-ssh root@your-vps
-cd /opt/docker-mirror
+cd /opt
+git clone https://github.com/htazq/container-mirror-for-china.git docker-mirror
+cd docker-mirror
+```
+
+或者下载 ZIP 包：
+```bash
+cd /opt
+wget https://github.com/htazq/container-mirror-for-china/archive/refs/heads/main.zip
+unzip main.zip
+mv container-mirror-for-china-main docker-mirror
+cd docker-mirror
 ```
 
 2. **修改域名（如果有自己的域名）**
